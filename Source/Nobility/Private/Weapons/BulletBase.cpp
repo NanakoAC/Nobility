@@ -6,7 +6,7 @@
 #include "GameFramework/DamageType.h"
 #include "Components/SphereComponent.h"
 #include "Components/StaticMeshComponent.h"
-#include "Weapons/WeaponBase.h"
+#include "Weapons/GunBase.h"
 #include "GameFramework/Actor.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -63,9 +63,9 @@ void ABulletBase::OnImpact(UPrimitiveComponent* HitComponent, AActor* OtherActor
 	}
 
 	float DamageToDeal = Damage;
-	if (GetOwner() && GetOwner()->IsA<AWeaponBase>())
+	if (GetOwner() && GetOwner()->IsA<AGunBase>())
 	{
-		AWeaponBase* MyGun = Cast<AWeaponBase>(GetOwner());
+		AGunBase* MyGun = Cast<AGunBase>(GetOwner());
 		DamageToDeal *= MyGun->DamageFactor;
 	}
 

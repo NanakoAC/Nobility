@@ -4,13 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
-#include "LuxCharacterBase.generated.h"
+#include "CharacterBase.generated.h"
 
 class UCameraComponent;
-class AWeaponBase;
+class AGunBase;
 
 UCLASS()
-class NOBILITY_API ALuxCharacterBase : public ACharacter
+class NOBILITY_API ACharacterBase : public ACharacter
 {
 	GENERATED_BODY()
 
@@ -35,22 +35,22 @@ class NOBILITY_API ALuxCharacterBase : public ACharacter
 
 public:
 	// Sets default values for this character's properties
-	ALuxCharacterBase();
+	ACharacterBase();
 
 	UCameraComponent* GetCameraComponent() { return CameraComp; }
 	USkeletalMeshComponent* GetMesh1P() { return Mesh1P; }
 
 	UPROPERTY(BlueprintReadOnly, Category = "Weapons")
-	AWeaponBase* EquippedWeapon;
+	AGunBase* EquippedWeapon;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Weapons")
-	FName AttachSocket;
+	FName AttachSocket = TEXT("GripPoint");
 
 	UFUNCTION(BlueprintPure, Category = "Weapons")
-	AWeaponBase* GetEquippedWeapon();
+	AGunBase* GetEquippedWeapon();
 
 	UFUNCTION(BlueprintCallable, Category = "Weapons")
-	AWeaponBase* EquipWeapon(TSubclassOf<AWeaponBase> NewWeapon);
+	AGunBase* EquipWeapon(TSubclassOf<AGunBase> NewWeapon);
 
 	UFUNCTION(BlueprintCallable, Category = "Weapons")
 	void UnEquipWeapon();

@@ -4,13 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "WeaponBase.generated.h"
+#include "GunBase.generated.h"
 
 class UArrowComponent;
 class ABulletBase;
 
 UCLASS()
-class NOBILITY_API AWeaponBase : public AActor
+class NOBILITY_API AGunBase : public AActor
 {
 	GENERATED_BODY()
 	
@@ -22,7 +22,7 @@ class NOBILITY_API AWeaponBase : public AActor
 	
 public:	
 	// Sets default values for this actor's properties
-	AWeaponBase();
+	AGunBase();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
 	TSubclassOf<ABulletBase> BulletClass;

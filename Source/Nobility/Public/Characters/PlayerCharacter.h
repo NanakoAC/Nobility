@@ -3,14 +3,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Characters/LuxCharacterBase.h"
-#include "LuxPlayerCharacter.generated.h"
+#include "Characters/CharacterBase.h"
+#include "PlayerCharacter.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class NOBILITY_API ALuxPlayerCharacter : public ALuxCharacterBase
+class NOBILITY_API APlayerCharacter : public ACharacterBase
 {
 	GENERATED_BODY()
 	
