@@ -105,46 +105,64 @@ void UDestructionComponent::Shatter()
 	FActorSpawnParameters params;
 	FTransform TransformOwner = GetOwner()->GetActorTransform();
 	AActor* Debris = GetWorld()->SpawnActor<AActor>(GeometryCollection, TransformOwner, params);
-	TCHAR* Filepath = TEXT("Blueprint'/Engine/EditorResources/FieldNodes/FS_MasterField.FS_MasterField'");
+	
 	//--------------------------------------------------------
-	UE_LOG(LogTemp, Error, TEXT("Attempting LoadObject"));
-	UBlueprint* BlueprintObj = LoadObject<UBlueprint>(nullptr, TEXT("Masterfield"),Filepath);
-
-	UE_LOG(LogTemp, Error, TEXT("Attempting LoadClass"));
-	UClass* BlueprintClass = LoadClass<AActor>(nullptr, TEXT("Masterfield"), Filepath);
-
-
-	UE_LOG(LogTemp, Error, TEXT("Attempting FindObject"));
-	UObject* LoadedBlueprint = FindObject<UObject>(nullptr, Filepath);
-
-	if (LoadedBlueprint)
-	{
-		UE_LOG(LogTemp, Error, TEXT("Success FindObject"));
-		UClass* BPClass = Cast<UClass>(LoadedBlueprint);
-	}
-
+	TCHAR* Filepath = TEXT("Blueprint'/Engine/EditorResources/FieldNodes/FS_MasterField.FS_MasterField'");
+	Filepath = TEXT("Blueprint'/Game/Destruction/FS_Master_Field_Instant.FS_Master_Field_Instant'");
 	UE_LOG(LogTemp, Error, TEXT("Attempting StaticLoadClass"));
 	UClass* BPClass = StaticLoadClass(UObject::StaticClass(), nullptr, Filepath);
 	if (BPClass)
 	{
-		UE_LOG(LogTemp, Error, TEXT("Success StaticLoadClass"));
+		UE_LOG(LogTemp, Error, TEXT("Success StaticLoadClass %s"), *BPClass->GetName());
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("failed StaticLoadClass"));
+		BPClass = LoadClass<AActor>(nullptr, Filepath);
+		if (BPClass)
+		{
+			UE_LOG(LogTemp, Error, TEXT("Success LoadClass %s"), *BPClass->GetName());
+		}
+	}
+
+	UE_LOG(LogTemp, Error, TEXT("Attempting FindObject"));
+	UObject* LoadedBlueprint = FindObject<UObject>(nullptr, Filepath);
+	if (LoadedBlueprint)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Success FindObject 1 %s"), *LoadedBlueprint->GetName());
+		UBlueprint* BlueprintAsset = Cast<UBlueprint>(LoadedBlueprint);
+		BPClass = BlueprintAsset->GeneratedClass;
+		if (BPClass)
+		{
+			UE_LOG(LogTemp, Error, TEXT("Success FindObject 2 %s"), *BPClass->GetName());
+		}
+	}
+
+	UE_LOG(LogTemp, Error, TEXT("Attempting LoadObject"));
+	UBlueprint* LoadedBlueprint2 = LoadObject<UBlueprint>(nullptr, TEXT("Blueprint'/Game/Path/To/MyBlueprint.MyBlueprint'"));
+	if (LoadedBlueprint2)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Success LoadObject 1 %s"), *LoadedBlueprint2->GetName());
+		BPClass = LoadedBlueprint2->GeneratedClass;
+		if (BPClass)
+		{
+			UE_LOG(LogTemp, Error, TEXT("Success LoadObject 2 %s"), *BPClass->GetName());
+		}
 	}
 
 	//----------------------------------------------
 	UE_LOG(LogTemp, Error, TEXT("Blueprintobj 1"));
 	// Check if the Blueprint object was loaded successfully
-	if (BlueprintObj)
+	if (BPClass)
 	{	
-		UE_LOG(LogTemp, Error, TEXT("Blueprintobj 2 %s"), *BlueprintObj->GetName());
+		UE_LOG(LogTemp, Error, TEXT("Blueprintobj 2"));
+		
 		// Get the generated C++ class of the Blueprint
 		//UClass* BlueprintClass = BlueprintObj->GeneratedClass;
 
 		// Spawn the Blueprint using the SpawnActor method
-		AActor* SpawnedActor = GetWorld()->SpawnActor(BlueprintClass, &TransformOwner, params);
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("Blueprintobj 3"));
+		AActor* SpawnedActor = GetWorld()->SpawnActor(BPClass, &TransformOwner, params);
+		if (SpawnedActor)	UE_LOG(LogTemp, Error, TEXT("SpawnedActor %s"), *SpawnedActor->GetName());
 	}
 
 

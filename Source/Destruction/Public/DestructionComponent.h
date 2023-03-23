@@ -8,7 +8,7 @@
 
 class AGeometryCollectionActor;
 
-UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+UCLASS(Blueprintable, EditInlineNew, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class DESTRUCTION_API UDestructionComponent : public UActorComponent
 {
 	GENERATED_BODY()
@@ -25,7 +25,6 @@ public:
 	//These are apparently just normal actors with a special component and setup
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category="Destruction")
 	TSubclassOf<AActor> GeometryCollection;
-	//TSubclassOf<AGeometryCollectionActor> GeometryCollection;
 	
 
 	//If true, destroy the object after we reach shatter limit
