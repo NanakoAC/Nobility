@@ -55,7 +55,7 @@ void ABulletBase::Tick(float DeltaTime)
 
 }
 
-void ABulletBase::OnImpact(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
+void ABulletBase::OnImpact_Implementation(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
 	if (!OtherActor)
 	{
@@ -73,6 +73,8 @@ void ABulletBase::OnImpact(UPrimitiveComponent* HitComponent, AActor* OtherActor
 	{
 		DamageToDeal *= 2;
 	}
+	UE_LOG(LogTemp, Warning, TEXT("Dealing damage to actor: %s"), *OtherActor->GetName());
+
 	//OtherActor->TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor * DamageCauser);
 	UGameplayStatics::ApplyDamage(OtherActor, DamageToDeal, nullptr, GetOwner(), UDamageType::StaticClass());
 }

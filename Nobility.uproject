@@ -11,6 +11,14 @@
 			"AdditionalDependencies": [
 				"Engine"
 			]
+		},
+		{
+			"Name": "Destruction",
+			"Type": "Runtime",
+			"LoadingPhase": "Default",
+			"AdditionalDependencies": [
+				"Engine", "GeometryCollectionEngine"
+			]
 		}
 	],
 	"Plugins": [
@@ -20,10 +28,6 @@
 			"TargetAllowList": [
 				"Editor"
 			]
-		},
-		{
-			"Name": "BlueprintRetarget",
-			"Enabled": true
 		}
 	]
 }
