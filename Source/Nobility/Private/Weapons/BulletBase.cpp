@@ -46,6 +46,18 @@ void ABulletBase::BeginPlay()
 
 	HitSphere->OnComponentHit.AddDynamic(this, &ABulletBase::OnImpact);
 	
+	// Get the actor's transform
+	FTransform ActorTransform = this->GetTransform();
+
+	// Get the start and end points for the debug line
+	FVector Start = ActorTransform.GetLocation();
+	FVector End = Start + (ActorTransform.GetRotation().GetForwardVector() * 800);
+
+	// Draw the debug line for 10 seconds
+	float Duration = 10.0f;
+	FColor Color = FColor::Green;
+	DrawDebugLine(GetWorld(), Start, End, Color, false, Duration);
+
 }
 
 // Called every frame

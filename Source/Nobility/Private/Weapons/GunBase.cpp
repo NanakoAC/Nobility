@@ -52,9 +52,19 @@ void AGunBase::Fire_Implementation()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Firing"));
 	AActor* BulletOwner = GetOwner() ? GetOwner() : this;
-	const FTransform SpawnTransform = MuzzlePoint->GetComponentTransform();
+	FTransform SpawnTransform = MuzzlePoint->GetComponentTransform();
 	
 	FActorSpawnParameters Params;
+	//Lets add a random spin to the bullet
+
+	//----------------------------
+	/*FVector Spin = FVector(FMath::RandRange(-180.0f, 180.0f), 0, 0);
+	FQuat QSpin = FQuat::MakeFromEuler(Spin);*/
+	FQuat QSpin = FQuat(FVector::ForwardVector, FMath::RandRange(-PI, PI));
+	SpawnTransform = (FTransform(QSpin) * SpawnTransform); //The ordering of these is very important, if swapped it will go badly
+
+	//-------------------------------
+
 	Params.Owner = this;
 	Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 	GetWorld()->SpawnActor<AActor>(BulletClass, SpawnTransform, Params);

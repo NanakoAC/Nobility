@@ -6,7 +6,18 @@
 #include "Components/ActorComponent.h"
 #include "DestructionComponent.generated.h"
 
-class AGeometryCollectionActor;
+class AGeometryCollectionActor;	
+class FProperty;
+
+UENUM()
+enum class EDestructionScatterType : uint8
+{
+	Scatter_Explode          UMETA(DisplayName = "Explode", ToolTip = "Projectiles are expelled outwards in all directions evenly"),
+	Scatter_Velocity             UMETA(DisplayName = "Velocity", ToolTip = "Debris will be launched along the direction the object was previously moving"),
+	Scatter_Impulse           UMETA(DisplayName = "Impulse", ToolTip = "Debris will be launched according to the direction of the collision impulse, which usually means bouncing off the target."),
+	Scatter_None					UMETA(DisplayName = "Collapse", ToolTip = "Debris will collapse and fall down on the spot with no momentum besides gravity")
+};
+
 
 UCLASS(Blueprintable, EditInlineNew, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class DESTRUCTION_API UDestructionComponent : public UActorComponent
@@ -61,6 +72,11 @@ public:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category="Destruction")
 	float MinimumForce = 0;
 
+	//When shattering, how shall we scatter the debris?
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Destruction")
+	EDestructionScatterType ScatterType = EDestructionScatterType::Scatter_Explode;
+
+
 private:
 	//Operations
 
@@ -71,9 +87,29 @@ private:
 	//In 99% of cases, we should only shatter once, but we can support multiples
 	int ShatterCount = 0;
 
+public:
+	//Registry
+
+	
+
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
+
+	//Here are classes for various blueprints set in blueprint
+	// They MUST all be named in the format ThingFieldSpawnClass
+	//UPROPERTY(EditDefaultsOnly, Category = "Destruction")
+	UPROPERTY(EditAnywhere, Category = "Destruction", meta = (EditCondition = "IsDirectlyEditedBlueprint"))
+	TSubclassOf<AActor> ExplodeFieldSpawnClass;
+
+	//UPROPERTY(EditDefaultsOnly, Category = "Destruction")
+	UPROPERTY(EditAnywhere, Category = "Destruction", meta = (EditCondition = "!(GetOwner() && GetOwner()->IsA<AActor>())"))
+	TSubclassOf<AActor> CollapseFieldSpawnClass;
+
+	UFUNCTION(BlueprintCallable, Category = "Destruction")
+	bool IsDirectlyEditedBlueprint() const;
+
+	virtual bool CanEditChange(const FProperty* InProperty) const override;
 
 public:	
 	// Called every frame
@@ -114,4 +150,14 @@ public:
 	//Called just before we do the thing
 	UFUNCTION()
 	void SetCooldown();
+
+	//Called to do the scattering
+	UFUNCTION()
+	void ScatterDebris(AActor* Debris);
+
+	//Destroys our owner
+	UFUNCTION()
+	void DestroyOwner();
 };
+
+
