@@ -43,6 +43,9 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = "Weapons")
 	AGunBase* EquippedWeapon;
 
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Weapons")
+	TArray<TSubclassOf<AGunBase>> WeaponInventory;
+
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Weapons")
 	FName AttachSocket = TEXT("GripPoint");
 
@@ -53,7 +56,18 @@ public:
 	AGunBase* EquipWeapon(TSubclassOf<AGunBase> NewWeapon);
 
 	UFUNCTION(BlueprintCallable, Category = "Weapons")
-	void UnEquipWeapon();
+	void GrantWeapon(TSubclassOf<AGunBase> NewWeapon, bool bEquip);
+
+	UFUNCTION(BlueprintCallable, Category = "Weapons")
+	void UnEquipWeapon(TSubclassOf<AGunBase> NewWeapon = NULL);
+
+	UFUNCTION(BlueprintCallable, Category = "Weapons")
+	void RemoveWeapon(TSubclassOf<AGunBase> NewWeapon);
+
+	UFUNCTION(BlueprintCallable, Category = "Weapons")
+	void CycleWeapon(bool bForward);
+
+	int NanaWrap(int input, int min, int max);
 
 protected:
 	// Called when the game starts or when spawned
@@ -82,4 +96,8 @@ public:
 	void StartSprint( );
 	void StopSprint( );
 
+	virtual void Destroyed() override;
+
+	UFUNCTION(BlueprintCallable, Category = "Weapons")
+	void Ragdoll();
 };

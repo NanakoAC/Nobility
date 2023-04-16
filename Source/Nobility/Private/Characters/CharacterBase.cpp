@@ -6,6 +6,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Components/InputComponent.h"
 #include "Weapons/GunBase.h"
+#include "Kismet/KismetMathLibrary.h"
 
 // Sets default values
 ACharacterBase::ACharacterBase()
@@ -43,6 +44,9 @@ AGunBase* ACharacterBase::EquipWeapon(TSubclassOf<AGunBase> NewWeapon)
 	UE_LOG(LogTemp, Warning, TEXT("Equipping weapon 1"));
 	if (EquippedWeapon)
 	{
+		if (EquippedWeapon->GetClass() == NewWeapon)	return EquippedWeapon;//Already got it on
+
+		//Remove current
 		UnEquipWeapon();
 	}
 	FActorSpawnParameters Params;
@@ -50,19 +54,91 @@ AGunBase* ACharacterBase::EquipWeapon(TSubclassOf<AGunBase> NewWeapon)
 	Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
 	EquippedWeapon = (GetWorld()->SpawnActor<AGunBase>(NewWeapon, Params));
-	EquippedWeapon->AttachToComponent(Mesh1P, FAttachmentTransformRules::SnapToTargetIncludingScale, AttachSocket);
+
+	if (IsPlayerControlled())
+	{
+		//Todo: Make this multiplayer compatible
+		EquippedWeapon->AttachToComponent(Mesh1P, FAttachmentTransformRules::SnapToTargetIncludingScale, AttachSocket);
+	}
+	else
+	{ 
+		EquippedWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale, AttachSocket);
+	}
 	UE_LOG(LogTemp, Warning, TEXT("Equipping weapon 2 : %s"), EquippedWeapon && EquippedWeapon->IsValidLowLevel() ? *EquippedWeapon->GetName() : TEXT("None"));
 
 	return EquippedWeapon;
 }
 
-void ACharacterBase::UnEquipWeapon()
+void ACharacterBase::GrantWeapon(TSubclassOf<AGunBase> NewWeapon, bool bEquip)
+{
+	WeaponInventory.AddUnique(NewWeapon);
+	if (bEquip)
+	{
+		EquipWeapon(NewWeapon);
+	}
+}
+
+
+//A weapon type can optionally be passed in, and we will only unequip if that is what we currently have on
+void ACharacterBase::UnEquipWeapon(TSubclassOf<AGunBase> NewWeapon)
 {
 	if (EquippedWeapon)
 	{
+		if (NewWeapon && EquippedWeapon->GetClass()->IsChildOf(NewWeapon))	return;
 		EquippedWeapon->OnUnequipped();
 		EquippedWeapon->Destroy();
 	}
+}
+
+void ACharacterBase::RemoveWeapon(TSubclassOf<AGunBase> NewWeapon)
+{
+	if (EquippedWeapon->GetClass()->IsChildOf(NewWeapon))
+	{
+		UnEquipWeapon();
+	}
+	WeaponInventory.AddUnique(NewWeapon);
+}
+
+void ACharacterBase::CycleWeapon(bool bForward)
+{
+	if (!WeaponInventory.Num()) return;
+
+	int CurrentEquipIndex = 0;
+	if (EquippedWeapon) CurrentEquipIndex = WeaponInventory.Find(EquippedWeapon->GetClass());
+	UE_LOG(LogTemp, Warning, TEXT("Cycling weapon num %d "), WeaponInventory.Num());
+	UE_LOG(LogTemp, Warning, TEXT("Cycling weapon current %d "), CurrentEquipIndex);
+	int TargetIndex = CurrentEquipIndex + (bForward ? 1 : -1);
+
+	UE_LOG(LogTemp, Warning, TEXT("Cycling weapon target1 %d "), TargetIndex);
+	TargetIndex = NanaWrap(TargetIndex, 0, WeaponInventory.Num() -1);
+
+	//My own implementation of Wrap
+
+
+	UE_LOG(LogTemp, Warning, TEXT("Cycling weapon target2 %d "), TargetIndex);
+	EquipWeapon(WeaponInventory[TargetIndex]);
+}
+
+int ACharacterBase::NanaWrap(int X, int Min, int Max)
+{
+	int Size = (Max - Min)+1;
+	if (Size == 0)
+	{
+		// Guard against zero-sized ranges causing an infinite loop.
+		return Max;
+	}
+
+	int EndVal = X;
+	while (EndVal < Min)
+	{
+		EndVal += Size;
+	}
+
+	while (EndVal > Max)
+	{
+		EndVal -= Size;
+	}
+	return EndVal;
 }
 
 // Called when the game starts or when spawned
@@ -193,4 +269,37 @@ void ACharacterBase::StartSprint()
 void ACharacterBase::StopSprint()
 {
 	GetCharacterMovement()->MaxWalkSpeed = DefaultWalkSpeed;
+}
+
+void ACharacterBase::Destroyed()
+{
+	if (EquippedWeapon)
+	{
+		EquippedWeapon->Drop();
+		
+		EquippedWeapon = nullptr;
+	}
+	Super::Destroyed();
+}
+
+void ACharacterBase::Ragdoll()
+{
+	if (EquippedWeapon)
+	{
+		EquippedWeapon->Drop();
+		
+		EquippedWeapon = nullptr;
+	}
+	USkeletalMeshComponent* Collider = GetMesh(); FindComponentByClass<USkeletalMeshComponent>();
+
+	if (Collider)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Collider is %s"), *Collider->GetName());
+		Collider->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
+		Collider->SetCollisionProfileName("Ragdoll");
+		Collider->SetSimulatePhysics(true);
+		Collider->SetEnableGravity(true);
+		Collider->RecreatePhysicsState();
+
+	}
 }
