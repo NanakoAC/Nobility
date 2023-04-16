@@ -66,5 +66,7 @@ public:
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "Weapon")
 	void OnUnequipped();
+
+	void Drop();
 };
  

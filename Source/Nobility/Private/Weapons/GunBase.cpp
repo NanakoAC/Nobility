@@ -92,4 +92,25 @@ void AGunBase::Tick(float DeltaTime)
 
 }
 
+void AGunBase::Drop()
+{
+	DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+	UE_LOG(LogTemp, Warning, TEXT("Gun drop 1"));
+	//Lets drop it on the ground
+	USkeletalMeshComponent* Collider = FindComponentByClass<USkeletalMeshComponent>();
+	if (Collider)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Collider is %s"), *Collider->GetName());
+		Collider->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
+		Collider->SetCollisionProfileName("Ragdoll");
+		Collider->SetSimulatePhysics(true);
+		Collider->SetEnableGravity(true);
+		Collider->RecreatePhysicsState();
+
+	}
+	else
+	{
+		Destroy();
+	}
+}
 
