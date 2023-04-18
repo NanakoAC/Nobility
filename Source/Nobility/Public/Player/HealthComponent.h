@@ -18,13 +18,15 @@ class NOBILITY_API UHealthComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
-	UFUNCTION() //A delegate function must be a ufunction or it will throw a runtime error
+	//A delegate function must be a ufunction or it will throw a runtime error
+	UFUNCTION()
 	void OnOwnerTakenDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);
 	
 public:	
 	// Sets default values for this component's properties
 	UHealthComponent();
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Health")
 	float CurrentHealth;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health")

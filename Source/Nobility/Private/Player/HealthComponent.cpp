@@ -3,11 +3,16 @@
 
 #include "Player/HealthComponent.h"
 #include "GameFramework/Actor.h"
+#include "Kismet/GameplayStatics.h"
 
 void UHealthComponent::OnOwnerTakenDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser)
 {
+	UE_LOG(LogTemp, Warning, TEXT("About to take damage!"));
 	float formerhealth = GetCurrentHealth();
+	UE_LOG(LogTemp, Warning, TEXT("Taking damage1! former health is  %f"), formerhealth);
+	UE_LOG(LogTemp, Warning, TEXT("Taking damage1! Current health is  %f"), CurrentHealth);
 	CurrentHealth = FMath::Clamp<float>(CurrentHealth - Damage, 0, MaxHealth);
+	UE_LOG(LogTemp, Warning, TEXT("Taking damage2! Current health is now %f"), CurrentHealth);
 	if (CurrentHealth != formerhealth)
 	{
 		OnHealthChanged.Broadcast(CurrentHealth - formerhealth);
@@ -33,14 +38,20 @@ UHealthComponent::UHealthComponent()
 void UHealthComponent::BeginPlay()
 {
 	Super::BeginPlay();
-	CurrentHealth = (StartingHealth == 0 ? MaxHealth : StartingHealth);
+	CurrentHealth = (StartingHealth <= 0 ? MaxHealth : StartingHealth);
 	// ...
-
+	
 	if (GetOwner())
 	{
-		GetOwner()->OnTakeAnyDamage.AddDynamic(this, &UHealthComponent::OnOwnerTakenDamage);
+		AActor* MyOwner = GetOwner();
+		UE_LOG(LogTemp, Warning, TEXT("Spawning healthcomponent on actor %s"), *GetOwner()->GetActorLabel());
+		UE_LOG(LogTemp, Warning, TEXT("Spawning healthcomponent on actor of class %s"), *GetOwner()->GetClass()->GetName());
+		MyOwner->OnTakeAnyDamage.AddDynamic(this, &UHealthComponent::OnOwnerTakenDamage);
+		MyOwner->OnTakeAnyDamage.BindUFunction(this, FName("OnOwnerTakenDamage"));
+		UE_LOG(LogTemp, Warning, TEXT("Spawning healthcomponent on actor %s"), *GetOwner()->GetActorLabel());
 	}
 	
+	//UGameplayStatics::ApplyDamage(GetOwner(), 100, nullptr, GetOwner(), UDamageType::StaticClass());
 }
 
 
