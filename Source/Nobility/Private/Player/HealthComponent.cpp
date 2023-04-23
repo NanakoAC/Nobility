@@ -5,7 +5,9 @@
 #include "GameFramework/Actor.h"
 #include "Kismet/GameplayStatics.h"
 
-void UHealthComponent::OnOwnerTakenDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser)
+#include "Net/UnrealNetwork.h"
+
+void UHealthComponent::OnOwnerTakenDamage_Implementation(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser)
 {
 	UE_LOG(LogTemp, Warning, TEXT("About to take damage!"));
 	float formerhealth = GetCurrentHealth();
@@ -23,6 +25,14 @@ void UHealthComponent::OnOwnerTakenDamage(AActor* DamagedActor, float Damage, co
 	}
 }
 
+void UHealthComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME_CONDITION(UHealthComponent, CurrentHealth, COND_None);
+	DOREPLIFETIME_CONDITION(UHealthComponent, MaxHealth, COND_None);
+}
+
 // Sets default values for this component's properties
 UHealthComponent::UHealthComponent()
 {
@@ -38,20 +48,21 @@ UHealthComponent::UHealthComponent()
 void UHealthComponent::BeginPlay()
 {
 	Super::BeginPlay();
+
+	if (GetOwner()->HasAuthority())
+	{
+		GetOwner()->SetReplicates(true);
+	}
+
 	CurrentHealth = (StartingHealth <= 0 ? MaxHealth : StartingHealth);
 	// ...
 	
 	if (GetOwner())
 	{
 		AActor* MyOwner = GetOwner();
-		UE_LOG(LogTemp, Warning, TEXT("Spawning healthcomponent on actor %s"), *GetOwner()->GetActorLabel());
-		UE_LOG(LogTemp, Warning, TEXT("Spawning healthcomponent on actor of class %s"), *GetOwner()->GetClass()->GetName());
 		MyOwner->OnTakeAnyDamage.AddDynamic(this, &UHealthComponent::OnOwnerTakenDamage);
-		MyOwner->OnTakeAnyDamage.BindUFunction(this, FName("OnOwnerTakenDamage"));
-		UE_LOG(LogTemp, Warning, TEXT("Spawning healthcomponent on actor %s"), *GetOwner()->GetActorLabel());
 	}
 	
-	//UGameplayStatics::ApplyDamage(GetOwner(), 100, nullptr, GetOwner(), UDamageType::StaticClass());
 }
 
 

@@ -7,6 +7,8 @@
 #include "Components/InputComponent.h"
 #include "Weapons/GunBase.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Helpers/Nanamath.h"
+#include "Net/UnrealNetwork.h"
 
 // Sets default values
 ACharacterBase::ACharacterBase()
@@ -39,12 +41,12 @@ AGunBase* ACharacterBase::GetEquippedWeapon()
 	return EquippedWeapon;
 }
 
-AGunBase* ACharacterBase::EquipWeapon(TSubclassOf<AGunBase> NewWeapon)
+void ACharacterBase::EquipWeapon_Implementation(TSubclassOf<AGunBase> NewWeapon)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Equipping weapon 1"));
 	if (EquippedWeapon)
 	{
-		if (EquippedWeapon->GetClass() == NewWeapon)	return EquippedWeapon;//Already got it on
+		if (EquippedWeapon->GetClass() == NewWeapon)	return;//Already got it on
 
 		//Remove current
 		UnEquipWeapon();
@@ -66,7 +68,11 @@ AGunBase* ACharacterBase::EquipWeapon(TSubclassOf<AGunBase> NewWeapon)
 	}
 	UE_LOG(LogTemp, Warning, TEXT("Equipping weapon 2 : %s"), EquippedWeapon && EquippedWeapon->IsValidLowLevel() ? *EquippedWeapon->GetName() : TEXT("None"));
 
-	return EquippedWeapon;
+	OnEquipped(EquippedWeapon);
+}
+
+void ACharacterBase::OnEquipped_Implementation(AGunBase* NewWeapon)
+{
 }
 
 void ACharacterBase::GrantWeapon(TSubclassOf<AGunBase> NewWeapon, bool bEquip)
@@ -110,7 +116,7 @@ void ACharacterBase::CycleWeapon(bool bForward)
 	int TargetIndex = CurrentEquipIndex + (bForward ? 1 : -1);
 
 	UE_LOG(LogTemp, Warning, TEXT("Cycling weapon target1 %d "), TargetIndex);
-	TargetIndex = NanaWrap(TargetIndex, 0, WeaponInventory.Num() -1);
+	TargetIndex = Nanamath::WrapToRange(TargetIndex, 0, WeaponInventory.Num() -1);
 
 	//My own implementation of Wrap
 
@@ -119,27 +125,7 @@ void ACharacterBase::CycleWeapon(bool bForward)
 	EquipWeapon(WeaponInventory[TargetIndex]);
 }
 
-int ACharacterBase::NanaWrap(int X, int Min, int Max)
-{
-	int Size = (Max - Min)+1;
-	if (Size == 0)
-	{
-		// Guard against zero-sized ranges causing an infinite loop.
-		return Max;
-	}
 
-	int EndVal = X;
-	while (EndVal < Min)
-	{
-		EndVal += Size;
-	}
-
-	while (EndVal > Max)
-	{
-		EndVal -= Size;
-	}
-	return EndVal;
-}
 
 // Called when the game starts or when spawned
 void ACharacterBase::BeginPlay()
@@ -150,6 +136,14 @@ void ACharacterBase::BeginPlay()
 	GetMesh()->SetCastShadow(true);
 
 	
+}
+
+void ACharacterBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME_CONDITION(ACharacterBase, WeaponInventory, COND_None); 
+	DOREPLIFETIME_CONDITION(ACharacterBase, EquippedWeapon, COND_None);
 }
 
 // Called every frame
@@ -282,7 +276,7 @@ void ACharacterBase::Destroyed()
 	Super::Destroyed();
 }
 
-void ACharacterBase::Ragdoll()
+void ACharacterBase::Ragdoll_Implementation()
 {
 	if (EquippedWeapon)
 	{
@@ -294,7 +288,6 @@ void ACharacterBase::Ragdoll()
 
 	if (Collider)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Collider is %s"), *Collider->GetName());
 		Collider->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
 		Collider->SetCollisionProfileName("Ragdoll");
 		Collider->SetSimulatePhysics(true);

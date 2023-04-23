@@ -47,8 +47,14 @@ public:
 	UFUNCTION(BlueprintNativeEvent, Category = "Weapon")
 	void StopFiring();
 	
-	UFUNCTION(BlueprintNativeEvent, Category = "Weapon")
+	UFUNCTION(BlueprintCallable, Category = "Weapon")
+	void HandleFire();
+
+	UFUNCTION(Server, Reliable, Category = "Weapon")
 	void Fire();
+
+	UFUNCTION(BlueprintNativeEvent, Category = "Weapon")
+	void PostFire();			
 
 	bool CanFire();
 

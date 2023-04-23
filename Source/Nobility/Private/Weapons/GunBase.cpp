@@ -33,12 +33,10 @@ void AGunBase::StartFiring_Implementation()
 
 	if (bFullyAutomatic)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("starting firing"));
-		UE_LOG(LogTemp, Warning, TEXT("Muzzle is at: %s"), *MuzzlePoint->GetComponentLocation().ToString());
-
-		GetWorldTimerManager().SetTimer(RefireHandle, this, &AGunBase::Fire, RefireRate, true);
+		GetWorldTimerManager().SetTimer(RefireHandle, this, &AGunBase::HandleFire, RefireRate, true);
 	}
-	Fire();
+	HandleFire();
+
 }
 
 void AGunBase::StopFiring_Implementation()
@@ -47,19 +45,34 @@ void AGunBase::StopFiring_Implementation()
 
 }
 
+void AGunBase::HandleFire()
+{
+	if (CanFire())
+	{
+		Fire();
+		PostFire();
+	}
+}
+
 //unsafe 
 void AGunBase::Fire_Implementation()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Firing"));
+	if (HasAuthority())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Firing on server"));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Firing on client"));
+	}
+	
 	AActor* BulletOwner = GetOwner() ? GetOwner() : this;
 	FTransform SpawnTransform = MuzzlePoint->GetComponentTransform();
-	
+
 	FActorSpawnParameters Params;
 	//Lets add a random spin to the bullet
 
 	//----------------------------
-	/*FVector Spin = FVector(FMath::RandRange(-180.0f, 180.0f), 0, 0);
-	FQuat QSpin = FQuat::MakeFromEuler(Spin);*/
 	FQuat QSpin = FQuat(FVector::ForwardVector, FMath::RandRange(-PI, PI));
 	SpawnTransform = (FTransform(QSpin) * SpawnTransform); //The ordering of these is very important, if swapped it will go badly
 
@@ -69,6 +82,11 @@ void AGunBase::Fire_Implementation()
 	Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 	GetWorld()->SpawnActor<AActor>(BulletClass, SpawnTransform, Params);
 
+	PostFire();
+}
+
+void AGunBase::PostFire_Implementation()
+{
 }
 
 bool AGunBase::CanFire()
@@ -83,6 +101,11 @@ void AGunBase::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	if (HasAuthority())
+	{
+		SetReplicates(true);
+		SetReplicateMovement(true);
+	}
 }
 
 // Called every frame

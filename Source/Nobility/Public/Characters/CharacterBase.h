@@ -40,10 +40,10 @@ public:
 	UCameraComponent* GetCameraComponent() { return CameraComp; }
 	USkeletalMeshComponent* GetMesh1P() { return Mesh1P; }
 
-	UPROPERTY(BlueprintReadOnly, Category = "Weapons")
+	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Weapons")
 	AGunBase* EquippedWeapon;
 
-	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Weapons")
+	UPROPERTY(Replicated, BlueprintReadOnly, EditAnywhere, Category = "Weapons")
 	TArray<TSubclassOf<AGunBase>> WeaponInventory;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Weapons")
@@ -52,8 +52,13 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Weapons")
 	AGunBase* GetEquippedWeapon();
 
-	UFUNCTION(BlueprintCallable, Category = "Weapons")
-	AGunBase* EquipWeapon(TSubclassOf<AGunBase> NewWeapon);
+	//Call this to do the equipping of a weapon on the server
+	UFUNCTION(Server, Reliable, BlueprintCallable, Category = "Weapons")
+	void EquipWeapon(TSubclassOf<AGunBase> NewWeapon);
+
+	//Called FROM EquipWeapon to let clients know that the equipping is done
+	UFUNCTION(Client, Reliable, BlueprintCallable, Category = "Weapons")
+	void OnEquipped(AGunBase* NewWeapon);
 
 	UFUNCTION(BlueprintCallable, Category = "Weapons")
 	void GrantWeapon(TSubclassOf<AGunBase> NewWeapon, bool bEquip);
@@ -72,6 +77,8 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 public:	
 	// Called every frame
@@ -98,6 +105,6 @@ public:
 
 	virtual void Destroyed() override;
 
-	UFUNCTION(BlueprintCallable, Category = "Weapons")
+	UFUNCTION(NetMulticast, Reliable, BlueprintCallable, Category = "Weapons")
 	void Ragdoll();
 };

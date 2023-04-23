@@ -44,6 +44,11 @@ void ABulletBase::BeginPlay()
 {
 	Super::BeginPlay();
 
+	if (HasAuthority())
+	{
+		SetReplicates(true);
+	}
+
 	HitSphere->OnComponentHit.AddDynamic(this, &ABulletBase::OnImpact);
 	
 	// Get the actor's transform
