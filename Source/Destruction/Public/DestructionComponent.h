@@ -105,11 +105,13 @@ protected:
 	//UPROPERTY(EditDefaultsOnly, Category = "Destruction")
 	UPROPERTY(EditAnywhere, Category = "Destruction", meta = (EditCondition = "!(GetOwner() && GetOwner()->IsA<AActor>())"))
 	TSubclassOf<AActor> CollapseFieldSpawnClass;
-
+#if WITH_EDITOR
 	UFUNCTION(BlueprintCallable, Category = "Destruction")
 	bool IsDirectlyEditedBlueprint() const;
 
+
 	virtual bool CanEditChange(const FProperty* InProperty) const override;
+#endif
 
 public:	
 	// Called every frame
