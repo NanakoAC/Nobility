@@ -52,9 +52,15 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Weapons")
 	AGunBase* GetEquippedWeapon();
 
+	UFUNCTION(BlueprintCallable, Category = "Weapons")
+	void CycleWeapon(bool bForward);
+
 	//Call this to do the equipping of a weapon on the server
 	UFUNCTION(Server, Reliable, BlueprintCallable, Category = "Weapons")
 	void EquipWeapon(TSubclassOf<AGunBase> NewWeapon);
+
+	UFUNCTION(Server, Reliable, BlueprintCallable, Category = "Weapons")
+	void DebugMessageTest();
 
 	//Called FROM EquipWeapon to let clients know that the equipping is done
 	UFUNCTION(Client, Reliable, BlueprintCallable, Category = "Weapons")
@@ -69,8 +75,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Weapons")
 	void RemoveWeapon(TSubclassOf<AGunBase> NewWeapon);
 
-	UFUNCTION(BlueprintCallable, Category = "Weapons")
-	void CycleWeapon(bool bForward);
+	
 
 	int NanaWrap(int input, int min, int max);
 

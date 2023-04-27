@@ -36,9 +36,55 @@ ACharacterBase::ACharacterBase()
 	DefaultWalkSpeed = GetCharacterMovement()->MaxWalkSpeed;
 }
 
+
+// Called when the game starts or when spawned
+void ACharacterBase::BeginPlay()
+{
+	Super::BeginPlay();
+	GetMesh()->SetOnlyOwnerSee(false);
+	GetMesh()->SetOwnerNoSee(true);
+	GetMesh()->SetCastShadow(true);
+	DebugMessageTest();
+
+}
+
 AGunBase* ACharacterBase::GetEquippedWeapon()
 {
 	return EquippedWeapon;
+}
+
+void ACharacterBase::CycleWeapon(bool bForward)
+{
+	UE_LOG(LogTemp, Warning, TEXT("cycle weapon 1"));
+	if (!WeaponInventory.Num()) return;
+
+	int CurrentEquipIndex = 0;
+	if (EquippedWeapon) CurrentEquipIndex = WeaponInventory.Find(EquippedWeapon->GetClass());
+	UE_LOG(LogTemp, Warning, TEXT("Cycling weapon num %d "), WeaponInventory.Num());
+	UE_LOG(LogTemp, Warning, TEXT("Cycling weapon current %d "), CurrentEquipIndex);
+	int TargetIndex = CurrentEquipIndex + (bForward ? 1 : -1);
+
+	UE_LOG(LogTemp, Warning, TEXT("Cycling weapon target1 %d "), TargetIndex);
+	TargetIndex = Nanamath::WrapToRange(TargetIndex, 0, WeaponInventory.Num() - 1);
+
+	//My own implementation of Wrap
+
+
+	UE_LOG(LogTemp, Warning, TEXT("Cycling weapon target2 %d "), TargetIndex);
+	EquipWeapon(WeaponInventory[TargetIndex]);
+}
+
+void ACharacterBase::DebugMessageTest_Implementation()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Debug message test"));
+	if (HasAuthority())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("We are running on server"));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("We are running on client"));
+	}
 }
 
 void ACharacterBase::EquipWeapon_Implementation(TSubclassOf<AGunBase> NewWeapon)
@@ -77,6 +123,7 @@ void ACharacterBase::OnEquipped_Implementation(AGunBase* NewWeapon)
 
 void ACharacterBase::GrantWeapon(TSubclassOf<AGunBase> NewWeapon, bool bEquip)
 {
+	UE_LOG(LogTemp, Warning, TEXT("granting weapon"));
 	WeaponInventory.AddUnique(NewWeapon);
 	if (bEquip)
 	{
@@ -105,38 +152,10 @@ void ACharacterBase::RemoveWeapon(TSubclassOf<AGunBase> NewWeapon)
 	WeaponInventory.AddUnique(NewWeapon);
 }
 
-void ACharacterBase::CycleWeapon(bool bForward)
-{
-	if (!WeaponInventory.Num()) return;
-
-	int CurrentEquipIndex = 0;
-	if (EquippedWeapon) CurrentEquipIndex = WeaponInventory.Find(EquippedWeapon->GetClass());
-	UE_LOG(LogTemp, Warning, TEXT("Cycling weapon num %d "), WeaponInventory.Num());
-	UE_LOG(LogTemp, Warning, TEXT("Cycling weapon current %d "), CurrentEquipIndex);
-	int TargetIndex = CurrentEquipIndex + (bForward ? 1 : -1);
-
-	UE_LOG(LogTemp, Warning, TEXT("Cycling weapon target1 %d "), TargetIndex);
-	TargetIndex = Nanamath::WrapToRange(TargetIndex, 0, WeaponInventory.Num() -1);
-
-	//My own implementation of Wrap
-
-
-	UE_LOG(LogTemp, Warning, TEXT("Cycling weapon target2 %d "), TargetIndex);
-	EquipWeapon(WeaponInventory[TargetIndex]);
-}
 
 
 
-// Called when the game starts or when spawned
-void ACharacterBase::BeginPlay()
-{
-	Super::BeginPlay();
-	GetMesh()->SetOnlyOwnerSee(false);
-	GetMesh()->SetOwnerNoSee(true);
-	GetMesh()->SetCastShadow(true);
 
-	
-}
 
 void ACharacterBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
@@ -228,9 +247,7 @@ void ACharacterBase::LookUpRate(float Value)
 
 void ACharacterBase::StartJump()
 {
-	UE_LOG(LogTemp, Warning, TEXT("SkeletalMeshComponent name: %s"), *GetMesh()->GetName());
-	UE_LOG(LogTemp, Warning, TEXT("SkeletalMeshComponent unique ID: %d"), GetMesh()->GetUniqueID());
-	UE_LOG(LogTemp, Warning, TEXT("SkeletalMeshComponent ownernosee: %d"), GetMesh()->bOwnerNoSee);
+	DebugMessageTest();
 	Jump();
 }
 
