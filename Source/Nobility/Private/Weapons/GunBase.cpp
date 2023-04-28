@@ -49,13 +49,13 @@ void AGunBase::HandleFire()
 {
 	if (CanFire())
 	{
-		Fire();
+		Fire(MuzzlePoint->GetComponentTransform());
 		PostFire();
 	}
 }
 
 //unsafe 
-void AGunBase::Fire_Implementation()
+void AGunBase::Fire_Implementation(FTransform SpawnTransform)
 {
 	if (HasAuthority())
 	{
@@ -67,7 +67,6 @@ void AGunBase::Fire_Implementation()
 	}
 	
 	AActor* BulletOwner = GetOwner() ? GetOwner() : this;
-	FTransform SpawnTransform = MuzzlePoint->GetComponentTransform();
 
 	FActorSpawnParameters Params;
 	//Lets add a random spin to the bullet
@@ -117,6 +116,7 @@ void AGunBase::Tick(float DeltaTime)
 
 void AGunBase::Drop()
 {
+	StopFiring();
 	DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
 	UE_LOG(LogTemp, Warning, TEXT("Gun drop 1"));
 	//Lets drop it on the ground

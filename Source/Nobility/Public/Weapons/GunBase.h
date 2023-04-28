@@ -51,7 +51,7 @@ public:
 	void HandleFire();
 
 	UFUNCTION(Server, Reliable, Category = "Weapon")
-	void Fire();
+	void Fire(FTransform SpawnTransform);
 
 	UFUNCTION(BlueprintNativeEvent, Category = "Weapon")
 	void PostFire();			

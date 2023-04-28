@@ -301,10 +301,15 @@ void ACharacterBase::Ragdoll_Implementation()
 		
 		EquippedWeapon = nullptr;
 	}
-	USkeletalMeshComponent* Collider = GetMesh(); FindComponentByClass<USkeletalMeshComponent>();
+	//USkeletalMeshComponent* Collider = GetMesh();// FindComponentByClass<USkeletalMeshComponent>();
 
-	if (Collider)
+	TArray<UPrimitiveComponent*> PrimitiveComponents;
+	GetComponents<UPrimitiveComponent>(PrimitiveComponents, true);
+
+	// Loop through the array and do something with each primitive component
+	for (auto& Collider : PrimitiveComponents)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("Actor component name: %s, class: %s"), *Collider->GetName(), *Collider->GetClass()->GetName());
 		Collider->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
 		Collider->SetCollisionProfileName("Ragdoll");
 		Collider->SetSimulatePhysics(true);
