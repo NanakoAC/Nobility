@@ -9,12 +9,8 @@
 
 void UHealthComponent::OnOwnerTakenDamage_Implementation(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser)
 {
-	UE_LOG(LogTemp, Warning, TEXT("About to take damage!"));
 	float formerhealth = GetCurrentHealth();
-	UE_LOG(LogTemp, Warning, TEXT("Taking damage1! former health is  %f"), formerhealth);
-	UE_LOG(LogTemp, Warning, TEXT("Taking damage1! Current health is  %f"), CurrentHealth);
 	CurrentHealth = FMath::Clamp<float>(CurrentHealth - Damage, 0, MaxHealth);
-	UE_LOG(LogTemp, Warning, TEXT("Taking damage2! Current health is now %f"), CurrentHealth);
 	if (CurrentHealth != formerhealth)
 	{
 		OnHealthChanged.Broadcast(CurrentHealth - formerhealth);

@@ -301,7 +301,6 @@ void ACharacterBase::Ragdoll_Implementation()
 		
 		EquippedWeapon = nullptr;
 	}
-	//USkeletalMeshComponent* Collider = GetMesh();// FindComponentByClass<USkeletalMeshComponent>();
 
 	TArray<UPrimitiveComponent*> PrimitiveComponents;
 	GetComponents<UPrimitiveComponent>(PrimitiveComponents, true);
