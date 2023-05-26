@@ -20,7 +20,7 @@ void AMovingPlatform::IterateTarget()
 void AMovingPlatform::BeginPlay()
 {
 	Super::BeginPlay();
-
+	UE_LOG(LogTemp, Warning, TEXT("platform beginplay "));
 	//Convert local to world
 	for (int i = 0; i<TargetLocations.Num(); i++)
 	{
@@ -28,10 +28,16 @@ void AMovingPlatform::BeginPlay()
 	}
 	TargetLocation = TargetLocations[TargetIndex];
 	
+
+	//It only ticks if its on the server and set to autoprocess
 	if (HasAuthority())
 	{
 		SetReplicates(true);
 		SetReplicateMovement(true);
+		if (!AutoProcess)
+		{
+			SetActorTickEnabled(false);
+		}
 	}
 	else
 	{

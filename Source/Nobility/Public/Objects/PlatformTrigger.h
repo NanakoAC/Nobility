@@ -8,6 +8,7 @@
 
 
 class UBoxComponent;
+class AMovingPlatform;
 
 UCLASS()
 class NOBILITY_API APlatformTrigger : public AActor
@@ -38,6 +39,9 @@ public:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Platform", meta = (AllowPrivateAccess = "true"))
 	UAnimationAsset* ReleaseAnimation;
 
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Platform", meta = (AllowPrivateAccess = "true"))
+	AMovingPlatform* AssignedPlatform;
+
 
 	UFUNCTION()
 	void OnComponentBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
@@ -45,10 +49,16 @@ public:
 	UFUNCTION()
 	void OnComponentEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
-	UFUNCTION(BlueprintNativeEvent)
+	UFUNCTION(NetMulticast, Reliable, BlueprintCallable, Category = "Platform")
 	void SwitchOn();
 
 	UFUNCTION(BlueprintNativeEvent)
+	void SwitchedOn();
+
+	UFUNCTION(NetMulticast, Reliable, BlueprintCallable, Category = "Platform")
 	void SwitchOff();
+
+	UFUNCTION(BlueprintNativeEvent)
+	void SwitchedOff();
 
 };

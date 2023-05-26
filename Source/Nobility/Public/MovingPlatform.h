@@ -17,6 +17,10 @@ class NOBILITY_API AMovingPlatform : public AStaticMeshActor
 public:
 	AMovingPlatform();
 
+	//Do we start moving on our own?
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Platform")
+	bool AutoProcess = true;
+
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Platform")
 	float MoveSpeed = 200.0f;
 
