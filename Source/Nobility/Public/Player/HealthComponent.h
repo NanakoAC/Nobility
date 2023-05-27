@@ -18,16 +18,16 @@ class NOBILITY_API UHealthComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
-	UFUNCTION() //A delegate function must be a ufunction or it will throw a runtime error
-	void OnOwnerTakenDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);
+	
 	
 public:	
 	// Sets default values for this component's properties
 	UHealthComponent();
 
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, Category = "Health")
 	float CurrentHealth;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health")
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Health")
 	float MaxHealth = 100;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health")
@@ -53,5 +53,10 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Health")
 	bool GetIsDead();
 
+	//A delegate function must be a ufunction or it will throw a runtime error
+	UFUNCTION(Server, Reliable)
+	void OnOwnerTakenDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);
 		
+
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 };

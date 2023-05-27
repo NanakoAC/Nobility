@@ -3,8 +3,11 @@
 
 #include "Player/HealthComponent.h"
 #include "GameFramework/Actor.h"
+#include "Kismet/GameplayStatics.h"
 
-void UHealthComponent::OnOwnerTakenDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser)
+#include "Net/UnrealNetwork.h"
+
+void UHealthComponent::OnOwnerTakenDamage_Implementation(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser)
 {
 	float formerhealth = GetCurrentHealth();
 	CurrentHealth = FMath::Clamp<float>(CurrentHealth - Damage, 0, MaxHealth);
@@ -16,6 +19,14 @@ void UHealthComponent::OnOwnerTakenDamage(AActor* DamagedActor, float Damage, co
 			OnDied.Broadcast();
 		}
 	}
+}
+
+void UHealthComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME_CONDITION(UHealthComponent, CurrentHealth, COND_None);
+	DOREPLIFETIME_CONDITION(UHealthComponent, MaxHealth, COND_None);
 }
 
 // Sets default values for this component's properties
@@ -33,12 +44,19 @@ UHealthComponent::UHealthComponent()
 void UHealthComponent::BeginPlay()
 {
 	Super::BeginPlay();
-	CurrentHealth = (StartingHealth == 0 ? MaxHealth : StartingHealth);
-	// ...
 
+	if (GetOwner()->HasAuthority())
+	{
+		GetOwner()->SetReplicates(true);
+	}
+
+	CurrentHealth = (StartingHealth <= 0 ? MaxHealth : StartingHealth);
+	// ...
+	
 	if (GetOwner())
 	{
-		GetOwner()->OnTakeAnyDamage.AddDynamic(this, &UHealthComponent::OnOwnerTakenDamage);
+		AActor* MyOwner = GetOwner();
+		MyOwner->OnTakeAnyDamage.AddDynamic(this, &UHealthComponent::OnOwnerTakenDamage);
 	}
 	
 }

@@ -44,6 +44,11 @@ void ABulletBase::BeginPlay()
 {
 	Super::BeginPlay();
 
+	if (HasAuthority())
+	{
+		SetReplicates(true);
+	}
+
 	HitSphere->OnComponentHit.AddDynamic(this, &ABulletBase::OnImpact);
 	
 	// Get the actor's transform
@@ -75,17 +80,21 @@ void ABulletBase::OnImpact_Implementation(UPrimitiveComponent* HitComponent, AAc
 	}
 
 	float DamageToDeal = Damage;
+	UE_LOG(LogTemp, Warning, TEXT("1 Basedamage %f"), Damage);
+	UE_LOG(LogTemp, Warning, TEXT("1 Dealing %f"), DamageToDeal);
 	if (GetOwner() && GetOwner()->IsA<AGunBase>())
 	{
 		AGunBase* MyGun = Cast<AGunBase>(GetOwner());
 		DamageToDeal *= MyGun->DamageFactor;
 	}
-
+	UE_LOG(LogTemp, Warning, TEXT("2 Dealing %f"), DamageToDeal);
 	if (Hit.BoneName == TEXT("HEAD")) //This is shitcode
 	{
 		DamageToDeal *= 2;
 	}
+	UE_LOG(LogTemp, Warning, TEXT("3 Dealing %f"), DamageToDeal);
 	UE_LOG(LogTemp, Warning, TEXT("Dealing damage to actor: %s"), *OtherActor->GetName());
+	UE_LOG(LogTemp, Warning, TEXT("Dealing damage to actor: %s"), *OtherActor->GetClass()->GetName());
 
 	//OtherActor->TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor * DamageCauser);
 	UGameplayStatics::ApplyDamage(OtherActor, DamageToDeal, nullptr, GetOwner(), UDamageType::StaticClass());

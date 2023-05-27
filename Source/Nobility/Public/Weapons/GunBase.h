@@ -47,8 +47,14 @@ public:
 	UFUNCTION(BlueprintNativeEvent, Category = "Weapon")
 	void StopFiring();
 	
+	UFUNCTION(BlueprintCallable, Category = "Weapon")
+	void HandleFire();
+
+	UFUNCTION(Server, Reliable, Category = "Weapon")
+	void Fire(FTransform SpawnTransform);
+
 	UFUNCTION(BlueprintNativeEvent, Category = "Weapon")
-	void Fire();
+	void PostFire();			
 
 	bool CanFire();
 

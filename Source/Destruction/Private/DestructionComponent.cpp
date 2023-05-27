@@ -191,7 +191,7 @@ void UDestructionComponent::DestroyOwner()
 	}
 }
 
-
+#if WITH_EDITOR
 //This returns true when this object's blueprint is being edited. Alone, as the main subject of editing
 //It returns false when this object is being edited in ANOTHER object's blueprint, as a component attached to it
 //Intended for authortime use only, won't work at runtime
@@ -202,6 +202,7 @@ bool UDestructionComponent::IsDirectlyEditedBlueprint() const
 
 	return result;
 }
+
 
 bool UDestructionComponent::CanEditChange(const FProperty* InProperty) const
 {
@@ -220,3 +221,4 @@ bool UDestructionComponent::CanEditChange(const FProperty* InProperty) const
 	}
 	return true;
 }
+#endif
