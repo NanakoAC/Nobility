@@ -8,7 +8,7 @@ public class Nobility : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 	
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "Destruction" });
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "Destruction", "UMG" });
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
 

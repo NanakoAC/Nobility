@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine/GameInstance.h"
+
 #include "NobilityGameInstance.generated.h"
 
 /**
@@ -22,6 +23,12 @@ class NOBILITY_API UNobilityGameInstance : public UGameInstance
 	void Host();
 
 	UFUNCTION(Exec)
+	void MainMenu();
+
+	UFUNCTION(Exec)
 	void Join(FString IP);
 	
+	TSubclassOf<class UUserWidget> MainMenuClass;
+
+
 };
