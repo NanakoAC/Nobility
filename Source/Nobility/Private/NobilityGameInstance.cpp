@@ -16,6 +16,7 @@ UNobilityGameInstance::UNobilityGameInstance()
 
 void UNobilityGameInstance::Init()
 {
+	Super::Init();
 	UE_LOG(LogTemp, Warning, TEXT("Gameinstance init, menuclass is %s"), *MainMenuClass->GetName());
 }
 
@@ -31,14 +32,10 @@ void UNobilityGameInstance::Host()
 
 void UNobilityGameInstance::MainMenu()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Mainmenu 1"));
 	if (!MainMenuClass) return;
-	UE_LOG(LogTemp, Warning, TEXT("Mainmenu 2"));
 	UUserWidget* Menu = CreateWidget<UUserWidget>(this, MainMenuClass);
-	UE_LOG(LogTemp, Warning, TEXT("Mainmenu 3 %s"), *Menu->GetName());
 
 	Menu->AddToViewport();
-	UE_LOG(LogTemp, Warning, TEXT("Mainmenu 4"));
 }
 
 void UNobilityGameInstance::Join(FString IP)
